@@ -25,6 +25,15 @@ func (n *node) String() string {
 
 // 向Trie树里面插入
 // 可以看作构建前缀树的过程 
+
+// 这里面有一个bug
+// 假设第一次注册的路由是 /p/:lang/doc
+// 然后又注册了一个路由 /p/go/doc
+// 那么最后一个结点的pattern就会由 "/p/:lang/doc" 变为 "/p/go/doc"
+// 虽然，当一个请求 /p/python/doc来到时依然会去匹配到这个路由， 但是 在router.go 100行 生成key时就会有些问题
+// 这个时候生成的key是 ”GET-"/p/go/doc" 而不是 ”GET-"/p/：lang/doc“
+// 此时就会把新到来的处理函数“错误绑定”， 变为{”GET-"/p/go/doc": handlePython}
+// 而不是 {”GET-"/p/：lang/doc": handlePython}
 func (n *node) insert(pattern string, parts []string, height int) {
 	if len(parts) == height { // 说明插入到了最后一个part，此时pattern构造完毕
 		n.pattern = pattern // 构造完毕
