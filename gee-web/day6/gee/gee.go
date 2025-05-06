@@ -147,7 +147,8 @@ func (rg *RouterGroup) createStaticHandler(relativePath string, fs http.FileSyst
 	absolutePath := path.Join(rg.prefix, relativePath)
 	// 去掉前缀，并且将去掉前缀后的文件地址给http.FileServer
 	// 这个http.FileServer会去创建一个
-	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs))
+	// 就是去映射文件地址到本地路径
+	fileServer := http.StripPrefix(absolutePath, http.FileServer(fs)) // StripPrefix是将absoultePath作为前缀去掉
 
 	return func(c *Context) {
 		file := c.Params["filepath"]
