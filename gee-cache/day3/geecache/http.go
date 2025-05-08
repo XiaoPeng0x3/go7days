@@ -33,13 +33,13 @@ func (h *HTTPPool) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	// 获取url, 不包含主机
 	if !strings.HasPrefix(req.URL.Path, h.baseUrl) { // 前缀不符合，我们认为这是一个错误请求
 		http.Error(w, "Bad url request", http.StatusBadRequest)
-		return
+		return // bug fix: http.Error并不会导致逻辑终结
 	}
 	// 解析 <groupName> 和 <key>
 	parts := strings.SplitN(req.URL.Path[len(baseUrl):], "/", 2)
 	if len(parts) != 2 {
 		http.Error(w, "Request params error", http.StatusBadRequest)
-		return
+		return // bug fix: http.Error并不会导致逻辑终结
 	}
 	// 得到groupName
 	groupName := parts[0]
@@ -50,12 +50,12 @@ func (h *HTTPPool) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	log.Println(group)
 	if group == nil { // 找不到对应集群, not found
 		http.Error(w, "Cant find group", http.StatusNotFound)
-		return
+		return // bug fix: http.Error并不会导致逻辑终结
 	}
 	views, err := group.Get(key)
 	if err != nil { // 缓存中不存在该数据
 		http.Error(w, "No such Value", http.StatusInternalServerError)
-		return
+		return // bug fix: http.Error并不会导致逻辑终结
 	}
 	// 把views数据写回去
 	w.Header().Set("Content-Type", "application/octet-stream")
