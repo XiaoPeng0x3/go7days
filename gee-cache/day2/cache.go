@@ -31,6 +31,9 @@ func (c *cache) get(key string)(bv ByteView, ok bool) {
 	c.mu.Lock()
 	// unlock
 	defer c.mu.Unlock()
+	if c.lru == nil { // 初次调用需要返回，从而获取可以初始化的lru结点
+		return
+	}
 	if value, ok := c.lru.Get(key); ok {
 		return value.(ByteView), ok
 	}
