@@ -95,11 +95,11 @@ func (h *HTTPPool) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	key := parts[1]
 	// 根据groupName找对应的group
 	group := GetGroup(groupName)
-	log.Println(group)
 	if group == nil { // 找不到对应集群, not found
 		http.Error(w, "Cant find group", http.StatusNotFound)
 		return // bug fix: http.Error并不会导致逻辑终结
 	}
+	// log.Println("http.go: 调用Get函数获取数据")
 	views, err := group.Get(key)
 	if err != nil { // 缓存中不存在该数据
 		http.Error(w, "No such Value", http.StatusInternalServerError)

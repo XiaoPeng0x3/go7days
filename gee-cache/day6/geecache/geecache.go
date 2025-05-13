@@ -80,14 +80,17 @@ func (g *Group) RegisterPeers(peers Peerpick) {
 
 // 加入从其它结点调用数据
 func (g *Group) load(key string) (value ByteView, err error) {
+	// if g == nil {
+	// 	log.Fatal("g is nil")
+	// 	return
+	// }
 	// 先从其它结点调用
-	views, err := g.singleflight.Do(key, func(key string) (interface{}, error) { // 数据不存在时会触发回调函数
+	views, err := g.singleflight.Do(key, func() (interface{}, error) { // 数据不存在时会触发回调函数
 		// 先从远程结点调用
 		if g.peers != nil {
 			// 选择结点
-			log.Println("geecache.go: 选择结点: 88行")
 			if peer, ok := g.peers.PickPeer(key); ok {
-				if view, err := g.getFromPeer(peer, key); err != nil {
+				if view, err := g.getFromPeer(peer, key); err == nil {
 					return view, err
 				}
 			}
@@ -95,6 +98,8 @@ func (g *Group) load(key string) (value ByteView, err error) {
 		// 从本地调用
 		return g.getLocally(key)
 	})
+
+	// log.Println(views, err)
 	
 	//
 	if err == nil { // 调用正常
@@ -134,10 +139,11 @@ func (g *Group) Get(key string) (ByteView, error) {
 	// 初次调用的时候可能 lru.lru会未初始化，需要判断
 	if val, ok := g.mainCache.get(key); ok {
 		// cache hit
-		log.Println("cache hit")
+		// log.Println("本地server: cache hit")
 		return val, nil
 	}
 	// 不存在需要从远程加载数据
+	// log.Println("geecache.go: 远程调用")
 	return g.load(key)
 }
 
