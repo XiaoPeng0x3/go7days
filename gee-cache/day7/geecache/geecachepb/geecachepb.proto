@@ -1,0 +1,23 @@
+// 指定语法
+syntax = "proto3";
+
+// 声明包名（protobuf 内部用，不是 Go 的包名）
+package geecachepb;
+
+// Go 代码生成时使用的包路径
+option go_package = "./";
+
+// 定义消息
+message Request {
+    string group = 1;
+    string key = 2;
+}
+
+message Response {
+    bytes value = 1;
+}
+
+// 定义服务
+service GroupCache {
+    rpc Get(Request) returns (Response);
+}
